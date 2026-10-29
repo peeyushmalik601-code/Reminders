@@ -12,7 +12,7 @@ app.use(express.static("public"));
 // === VAPID KEYS ===
 // Pehli baar: npx web-push generate-vapid-keys
 // Phir yahan ya Render env vars me daalo
-const VAPID_PUBLIC = process.env.VAPID_PUBLIC || "PASTE_PUBLIC_KEY_HERE";
+const VAPID_PUBLIC = process.env.VAPID_PUBLIC || "BMBJle24bjGDYoPCHIBzpa_-_NINz6AqFBrqs4FMPl8RYr1FVzN_ZYBeKHImnQQQdPXGum9JyAeld0OEE7189w";
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE || "PASTE_PRIVATE_KEY_HERE";
 const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:you@example.com";
 
