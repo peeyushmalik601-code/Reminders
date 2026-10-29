@@ -61,7 +61,6 @@ app.post("/api/reminders", (req, res) => {
   res.json({ ok: true, reminder });
 });
 
-// NEW: Edit/Update Reminder Route
 app.put("/api/reminders/:id", (req, res) => {
   const { title, message, time, repeat } = req.body;
   const reminder = db.reminders.find(r => r.id === req.params.id);
@@ -71,7 +70,7 @@ app.put("/api/reminders/:id", (req, res) => {
   if (message !== undefined) reminder.message = String(message || "").slice(0, 300);
   if (time) reminder.time = Number(time);
   if (repeat) reminder.repeat = repeat === "daily" ? "daily" : "none";
-  reminder.fired = false; // Reset fired status on edit
+  reminder.fired = false; 
 
   persist();
   res.json({ ok: true, reminder });
@@ -88,21 +87,6 @@ app.delete("/api/reminders/:id", (req, res) => {
   db.reminders = db.reminders.filter(r => r.id !== req.params.id);
   persist();
   res.json({ ok: true, deleted: before - db.reminders.length });
-});
-
-app.post("/api/test-push", async (req, res) => {
-  const { deviceId } = req.body;
-  const device = db.devices[deviceId];
-  if (!device) return res.status(404).json({ error: "device not subscribed" });
-  try {
-    await webpush.sendNotification(device.subscription, JSON.stringify({
-      title: "✅ Test Push",
-      body: "Tab band karke dekho — phir bhi notification aayegi!"
-    }));
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ error: e.message, statusCode: e.statusCode });
-  }
 });
 
 // === CRON ===
