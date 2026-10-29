@@ -1,9 +1,20 @@
 {
-  "name": "Reminder",
+  "name": "Reminder Push",
   "short_name": "Reminder",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f1220",
-  "theme_color": "#6c7bff",
-  "icons": []
+  "background_color": "#0a0a14",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEwMCIgZmlsbD0iIzhiNWNmNiIvPjx0ZXh0IHg9IjI1NiIgeT0iMjU2IiBmb250LXNpemU9IjI1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiPvCfkqU8L3RleHQ+PC9zdmc+",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEwMCIgZmlsbD0iIzhiNWNmNiIvPjx0ZXh0IHg9IjI1NiIgeT0iMjU2IiBmb250LXNpemU9IjI1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiPvCfkqU8L3RleHQ+PC9zdmc+",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
 }
