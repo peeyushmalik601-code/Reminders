@@ -47,6 +47,7 @@
   label { font-size: 12.5px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
   input, textarea, select { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main); font-size: 15px; font-family: inherit; outline: none; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  
   .custom-date-btn { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main); font-size: 15px; text-align: left; display: flex; justify-content: space-between; cursor: pointer; }
   .quick-times { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .quick-btn { background: var(--glass-bg); color: var(--text-muted); border: 1px solid var(--glass-border); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
@@ -73,10 +74,6 @@
   .item .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; font-size: 12px; font-weight: 600; }
   .pill { background: var(--input-bg); border: 1px solid var(--glass-border); padding: 4px 10px; border-radius: 999px; }
   
-  /* Tags Colors */
-  .tag-health { color: #f87171; } .tag-work { color: #60a5fa; }
-  .tag-personal { color: #4ade80; } .tag-other { color: #a1a1aa; }
-
   .item-actions { display: flex; flex-direction: column; gap: 8px; }
   .icon-btn { background: transparent; border: 1px solid var(--glass-border); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: var(--text-muted); cursor: pointer; }
   
@@ -94,8 +91,74 @@
   .cal-day-label { font-size: 11px; color: var(--text-muted); font-weight: 700; text-align: center; }
   .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 14px; cursor: pointer; }
   .cal-day.selected { background: var(--accent); color: #fff; }
-  .time-selector { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; }
-  .time-selector select { width: auto; padding: 10px; font-size: 16px; font-weight: 700; }
+
+  /* === CUSTOM TIME WHEEL PICKER === */
+  .time-wheel-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+    position: relative;
+    background: rgba(0,0,0,0.2);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+  }
+  .time-wheel {
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+    width: 60px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+  .time-wheel::-webkit-scrollbar { display: none; }
+  .time-wheel-item {
+    height: 50px;
+    line-height: 50px;
+    scroll-snap-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: color 0.2s, transform 0.2s, opacity 0.2s;
+    opacity: 0.4;
+  }
+  .time-wheel-item.active {
+    color: var(--accent);
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  .time-colon {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-main);
+    padding: 0 2px;
+    z-index: 2;
+    margin-top: -5px;
+    opacity: 0.7;
+  }
+  /* Center selection highlight */
+  .time-wheel-container::after {
+    content: '';
+    position: absolute;
+    top: 50px;
+    left: 5%;
+    width: 90%;
+    height: 50px;
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    pointer-events: none;
+    z-index: 1;
+  }
 
   #toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 1100; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; }
   .toast { background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); padding: 12px 24px; border-radius: 100px; font-weight: 600; opacity: 0; transform: translateY(20px); transition: all 0.3s; }
@@ -167,11 +230,19 @@
 <div class="modal-overlay" id="confirmModal"><div class="modal-box"><p id="modalMsg"></p><div class="actions" style="margin-top:20px"><button class="cancel-edit" style="display:block" id="modalCancel">Cancel</button><button class="primary" style="background:var(--danger)" id="modalOk">Delete</button></div></div></div>
 
 <div class="modal-overlay" id="datePickerModal">
-  <div class="modal-box">
+  <div class="modal-box" style="max-width: 340px;">
     <div class="cal-header"><button type="button" id="prevMonth">❮</button><span id="monthYearLabel"></span><button type="button" id="nextMonth">❯</button></div>
     <div class="cal-grid" id="calGrid"></div>
-    <div class="time-selector"><select id="hourSelect"></select><span>:</span><select id="minuteSelect"></select></div>
-    <div class="actions"><button class="cancel-edit" style="display:block" id="closeDatePicker">Cancel</button><button class="primary" id="confirmDateBtn">Set</button></div>
+    
+    <!-- UNIQUE TIME WHEEL PICKER -->
+    <div class="time-wheel-container">
+      <div class="time-wheel" id="hourWheel"></div>
+      <div class="time-colon">:</div>
+      <div class="time-wheel" id="minuteWheel"></div>
+      <div class="time-wheel" id="ampmWheel" style="width: 70px;"></div>
+    </div>
+
+    <div class="actions"><button class="cancel-edit" style="display:block" id="closeDatePicker">Cancel</button><button class="primary" id="confirmDateBtn">Set Time</button></div>
   </div>
 </div>
 
@@ -181,7 +252,6 @@
 (function () {
   "use strict";
   
-  // Theme & UI helpers
   const themeToggle = document.getElementById('themeToggle');
   const currentTheme = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', currentTheme);
@@ -213,7 +283,6 @@
     if (confirmCallback) confirmCallback();
   };
 
-  // App Variables
   var setupEl = document.getElementById("setup"), form = document.getElementById("form"), listEl = document.getElementById("list");
   var titleEl = document.getElementById("title"), msgEl = document.getElementById("msg"), timeEl = document.getElementById("time");
   var displayDateEl = document.getElementById("displayDate"), repeatEl = document.getElementById("repeat"), categoryEl = document.getElementById("category");
@@ -222,9 +291,8 @@
   var deviceId = localStorage.getItem("deviceId") || "d_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9);
   localStorage.setItem("deviceId", deviceId);
   var editingId = null;
-  var currentTab = "active"; // active | history
+  var currentTab = "active";
 
-  // Tabs Logic
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -245,13 +313,60 @@
   }
   function fmtTime(ts) { return new Date(ts).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); }
 
-  // === CALENDAR MODAL LOGIC ===
+  // === CALENDAR & TIME WHEEL MODAL LOGIC ===
   let pickerDate = new Date(), selectedDate = new Date();
   const datePickerModal = document.getElementById("datePickerModal"), monthYearLabel = document.getElementById("monthYearLabel");
-  const calGrid = document.getElementById("calGrid"), hourSelect = document.getElementById("hourSelect"), minuteSelect = document.getElementById("minuteSelect");
+  const calGrid = document.getElementById("calGrid");
+  
+  const hourWheel = document.getElementById("hourWheel"), minuteWheel = document.getElementById("minuteWheel"), ampmWheel = document.getElementById("ampmWheel");
+  let tempHour = 12, tempMinute = 0, tempAmPm = "AM";
 
-  for(let i=0; i<24; i++) hourSelect.innerHTML += `<option value="${i}">${pad(i)}</option>`;
-  for(let i=0; i<60; i++) minuteSelect.innerHTML += `<option value="${i}">${pad(i)}</option>`;
+  // Wheel creation logic
+  function createWheel(container, values, initialValue, onChange) {
+    container.innerHTML = '';
+    container.innerHTML += `<div class="time-wheel-item" style="pointer-events:none;"></div>`; // top padding
+    
+    values.forEach(v => {
+      let div = document.createElement('div'); div.className = 'time-wheel-item'; div.textContent = v; container.appendChild(div);
+    });
+    
+    container.innerHTML += `<div class="time-wheel-item" style="pointer-events:none;"></div>`; // bottom padding
+
+    let selectedIndex = values.indexOf(initialValue);
+    if(selectedIndex < 0) selectedIndex = 0;
+    
+    container.scrollTop = selectedIndex * 50;
+
+    let scrollTimeout;
+    container.onscroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        let index = Math.round(container.scrollTop / 50);
+        if (index >= 0 && index < values.length) {
+          onChange(values[index]);
+          Array.from(container.children).forEach((child, i) => {
+            if(i > 0 && i <= values.length) child.classList.toggle('active', (i - 1) === index);
+          });
+        }
+      }, 100);
+    };
+    
+    setTimeout(() => {
+      Array.from(container.children).forEach((child, i) => {
+        if(i > 0 && i <= values.length) child.classList.toggle('active', (i - 1) === selectedIndex);
+      });
+    }, 50);
+  }
+
+  function setupWheels() {
+    let hours = []; for (let i = 1; i <= 12; i++) hours.push(pad(i));
+    let minutes = []; for (let i = 0; i < 60; i++) minutes.push(pad(i));
+    let ampm = ["AM", "PM"];
+
+    createWheel(hourWheel, hours, pad(tempHour), (val) => tempHour = parseInt(val));
+    createWheel(minuteWheel, minutes, pad(tempMinute), (val) => tempMinute = parseInt(val));
+    createWheel(ampmWheel, ampm, tempAmPm, (val) => tempAmPm = val);
+  }
 
   function renderCalendar() {
     const year = pickerDate.getFullYear(), month = pickerDate.getMonth();
@@ -272,25 +387,39 @@
     }
   }
 
-  document.getElementById("customDateBtn").onclick = () => {
+  document.getElementById("customDateBtn").onclick = (e) => {
+    e.preventDefault();
     selectedDate = timeEl.value ? new Date(timeEl.value) : new Date(Date.now() + 5*60000);
     pickerDate = new Date(selectedDate);
-    hourSelect.value = selectedDate.getHours(); minuteSelect.value = selectedDate.getMinutes();
-    renderCalendar(); datePickerModal.classList.add("active");
+    
+    // Setup wheels with current selected time
+    let h = selectedDate.getHours();
+    tempAmPm = h >= 12 ? "PM" : "AM";
+    tempHour = h % 12 || 12;
+    tempMinute = selectedDate.getMinutes();
+
+    renderCalendar(); 
+    setupWheels();
+    datePickerModal.classList.add("active");
   };
+  
   document.getElementById("prevMonth").onclick = () => { pickerDate.setMonth(pickerDate.getMonth() - 1); renderCalendar(); };
   document.getElementById("nextMonth").onclick = () => { pickerDate.setMonth(pickerDate.getMonth() + 1); renderCalendar(); };
   document.getElementById("closeDatePicker").onclick = () => datePickerModal.classList.remove("active");
+  
   document.getElementById("confirmDateBtn").onclick = () => {
-    selectedDate.setHours(parseInt(hourSelect.value), parseInt(minuteSelect.value));
-    setDateTime(selectedDate); datePickerModal.classList.remove("active");
+    let finalHour = tempHour % 12;
+    if (tempAmPm === "PM") finalHour += 12;
+    selectedDate.setHours(finalHour, tempMinute);
+    setDateTime(selectedDate); 
+    datePickerModal.classList.remove("active");
   };
 
   document.getElementById("quickTimes").addEventListener("click", function(e) {
     if(e.target.classList.contains("quick-btn")) setDateTime(new Date(Date.now() + parseInt(e.target.getAttribute("data-mins")) * 60000));
   });
 
-  // === FETCH & RENDER ===
+  // === APP API & LOGIC ===
   async function loadReminders() {
     try {
       var list = await fetch("/api/reminders?deviceId=" + encodeURIComponent(deviceId)).then(r => r.json());
@@ -299,34 +428,23 @@
   }
 
   function render(items) {
-    // Filter based on tab
     const filtered = items.filter(it => currentTab === "active" ? !it.fired : it.fired);
-
-    if (!filtered.length) { 
-      listEl.innerHTML = `<div class="empty">Koi reminder nahi hai.</div>`; return; 
-    }
+    if (!filtered.length) { listEl.innerHTML = `<div class="empty">Koi reminder nahi hai.</div>`; return; }
+    
     filtered.sort((a, b) => a.time - b.time);
     listEl.innerHTML = "";
     
     filtered.forEach(function (it) {
       var card = document.createElement("div");
       card.className = "item" + (it.fired ? " done" : "") + (it.paused ? " paused" : "");
-      
-      // Category Color
       if(it.category === "health") card.style.borderLeftColor = "#f87171";
       else if(it.category === "work") card.style.borderLeftColor = "#60a5fa";
       else if(it.category === "personal") card.style.borderLeftColor = "#4ade80";
       
       var body = document.createElement("div"); body.className = "body";
-      
       var t = document.createElement("div"); t.className = "t"; 
-      // Add Category Dot
-      let catDot = "";
-      if(it.category === "health") catDot = "🔴 ";
-      else if(it.category === "work") catDot = "🔵 ";
-      else if(it.category === "personal") catDot = "🟢 ";
-      t.innerHTML = catDot + it.title; 
-      body.appendChild(t);
+      let catDot = it.category === "health" ? "🔴 " : (it.category === "work" ? "🔵 " : (it.category === "personal" ? "🟢 " : ""));
+      t.innerHTML = catDot + it.title; body.appendChild(t);
       
       if (it.message) { var m = document.createElement("div"); m.className = "m"; m.textContent = it.message; body.appendChild(m); }
       
@@ -335,12 +453,10 @@
       meta.innerHTML += `<span class="pill">${it.repeat === "daily" ? "🔁 Daily" : "1️⃣ Once"}</span>`;
       if (it.paused) meta.innerHTML += `<span class="pill" style="color:#f59e0b; border-color:#f59e0b">⏸ Paused</span>`;
       if (it.fired) meta.innerHTML += `<span class="pill">✅ Done</span>`;
-      body.appendChild(meta);
-      card.appendChild(body);
+      body.appendChild(meta); card.appendChild(body);
 
       var actions = document.createElement("div"); actions.className = "item-actions";
 
-      // Pause/Resume (only for daily)
       if(!it.fired && it.repeat === "daily") {
         var pauseBtn = document.createElement("button"); pauseBtn.className = "icon-btn"; 
         pauseBtn.innerHTML = it.paused ? "▶️" : "⏸";
@@ -364,14 +480,11 @@
           loadReminders(); showToast("Deleted");
         });
       };
-      actions.appendChild(delBtn);
-      card.appendChild(actions);
-
+      actions.appendChild(delBtn); card.appendChild(actions);
       listEl.appendChild(card);
     });
   }
 
-  // Edit & Form Logic
   function startEdit(reminder) {
     editingId = reminder.id;
     titleEl.value = reminder.title;
@@ -408,7 +521,6 @@
     resetForm(); loadReminders();
   });
 
-  // === SUBSCRIBE ===
   function urlB64ToUint8(b64) {
     var pad = "=".repeat((4 - b64.length % 4) % 4);
     var s = (b64 + pad).replace(/-/g, "+").replace(/_/g, "/");
