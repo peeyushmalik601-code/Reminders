@@ -2,53 +2,69 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reminder — Push</title>
-<link rel="manifest" href="/manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Reminder Push</title>
 <style>
   :root{--bg:#0f1220;--card:#171a2e;--card2:#1e2240;--line:#2b3050;--txt:#e8ebff;--muted:#9aa0c7;--accent:#6c7bff;--accent2:#8f5bff;--danger:#ef4444;--ok:#22c55e}
-  *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;font-family:system-ui,sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#23285c 0%,transparent 60%),radial-gradient(900px 500px at 110% 10%,#4a2060 0%,transparent 55%),var(--bg);color:var(--txt);padding:24px 16px 80px}
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#23285c 0%,transparent 60%),radial-gradient(900px 500px at 110% 10%,#4a2060 0%,transparent 55%),var(--bg);color:var(--txt);padding:24px 16px 80px}
   .wrap{max-width:640px;margin:0 auto}
   header{text-align:center;margin-bottom:22px}
-  h1{margin:0;font-size:28px}
+  h1{margin:0;font-size:28px;letter-spacing:-0.5px}
   .sub{margin:6px 0 0;color:var(--muted);font-size:14px}
-  .card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:18px}
-  .row{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-  label{font-size:12.5px;color:var(--muted);font-weight:600}
-  input,textarea,select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:#0e1126;color:var(--txt);font-size:14.5px;font-family:inherit;outline:none}
+  .card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 12px 30px rgba(0,0,0,.35); transition: all 0.3s ease;}
+  .row{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+  label{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;}
+  input,textarea,select{width:100%;padding:14px;border-radius:12px;border:1px solid var(--line);background:#0e1126;color:var(--txt);font-size:15px;font-family:inherit;outline:none;transition:border-color 0.2s, box-shadow 0.2s;}
   input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,123,255,.18)}
+  textarea{resize:vertical}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media(max-width:460px){.grid2{grid-template-columns:1fr}}
-  .actions{display:flex;gap:10px}
-  button{cursor:pointer;border:none;border-radius:10px;font-family:inherit;font-size:14.5px;font-weight:600;padding:12px 16px}
-  .primary{flex:1;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+  
+  /* Quick Time Buttons */
+  .quick-times{display:flex;gap:8px;flex-wrap:wrap;margin-top:-6px;margin-bottom:8px}
+  .quick-btn{background:#242a4e;color:#cfd4ff;border:1px solid #3b4478;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+  .quick-btn:active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+  .actions{display:flex;gap:10px;margin-top:12px}
+  button{cursor:pointer;border:none;border-radius:12px;font-family:inherit;font-size:15px;font-weight:700;padding:14px 18px;transition:transform .1s, filter .2s;}
+  button:active{transform:scale(.96)}
+  .primary{flex:1;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 8px 20px rgba(108,123,255,.3)}
   .ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
   .danger{background:#3a1418;color:var(--danger);border:1px solid #4a1f24}
-  .setup{background:#3a2a10;border:1px solid #7a5a12;color:#ffd591;padding:14px;border-radius:12px;margin-bottom:16px;font-size:13.5px}
+  .cancel-edit{display:none; background:#3a1418; color:var(--danger); border:1px solid #4a1f24; padding:14px; border-radius:12px; font-weight:700;}
+
+  .setup{background:#3a2a10;border:1px solid #7a5a12;color:#ffd591;padding:16px;border-radius:14px;margin-bottom:20px;font-size:14px; text-align:center;}
   .setup.ok{background:#0f2a1a;border-color:#166534;color:#bbf7d0}
-  .setup button{margin-top:10px;background:#fbbf24;color:#2b1d00;padding:10px 16px}
-  .listhead{display:flex;align-items:center;justify-content:space-between;margin:26px 0 12px}
-  .listhead h2{margin:0;font-size:16px;color:var(--muted);letter-spacing:.4px;text-transform:uppercase}
-  .item{background:linear-gradient(180deg,#191d36,#161a30);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;gap:12px}
+  .setup button{margin-top:12px;background:#fbbf24;color:#2b1d00;padding:12px 20px;width:100%}
+  
+  .listhead{display:flex;align-items:center;justify-content:space-between;margin:30px 0 16px}
+  .listhead h2{margin:0;font-size:16px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+  
+  .item{background:linear-gradient(180deg,#191d36,#161a30);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;gap:14px; transition:all 0.3s;}
   .item.done{opacity:.5;border-left-color:var(--ok)}
   .item .body{flex:1;min-width:0}
-  .item .t{font-weight:700;font-size:15px;margin-bottom:3px}
-  .item .m{font-size:13.5px;color:var(--muted);white-space:pre-wrap}
-  .item .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;font-size:12px;color:var(--muted)}
-  .pill{background:#242a4e;border:1px solid var(--line);padding:3px 9px;border-radius:999px}
-  .empty{text-align:center;color:var(--muted);font-size:14px;padding:28px 10px;border:1px dashed var(--line);border-radius:12px}
-  .status{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
+  .item .t{font-weight:700;font-size:16px;margin-bottom:4px; line-height:1.3;}
+  .item .m{font-size:14px;color:var(--muted);white-space:pre-wrap; line-height:1.4;}
+  .item .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:12px;color:var(--muted); font-weight:600;}
+  .pill{background:#242a4e;border:1px solid var(--line);padding:4px 10px;border-radius:999px; display:inline-flex; align-items:center; gap:4px;}
+  
+  .item-actions{display:flex; flex-direction:column; gap:8px;}
+  .icon-btn{background:transparent;border:1px solid var(--line);width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:16px;padding:0;color:var(--muted);}
+  .icon-btn:hover{background:#242a4e; color:var(--txt);}
+  .icon-btn.del:hover{background:#3a1418; color:var(--danger); border-color:#4a1f24;}
+
+  .empty{text-align:center;color:var(--muted);font-size:14px;padding:36px 10px;border:1px dashed var(--line);border-radius:16px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>🔔 Reminder Push</h1>
-    <p class="sub">Tab band ho — phir bhi notification aayegi.</p>
+    <p class="sub">Apne kaam bhoolna band karo.</p>
   </header>
 
-  <div id="setup" class="setup">Notifications enable karo…</div>
+  <div id="setup" class="setup">Checking notifications...</div>
 
   <form id="form" class="card">
     <div class="row">
@@ -56,8 +72,8 @@
       <input id="title" required maxlength="80" placeholder="e.g. Paani peena">
     </div>
     <div class="row">
-      <label>Message</label>
-      <textarea id="msg" rows="2" maxlength="200" placeholder="Optional"></textarea>
+      <label>Message (Optional)</label>
+      <textarea id="msg" rows="2" maxlength="200" placeholder="Kuch detail likhna ho toh..."></textarea>
     </div>
     <div class="grid2">
       <div class="row">
@@ -69,15 +85,25 @@
         <select id="repeat"><option value="none">Once</option><option value="daily">Daily</option></select>
       </div>
     </div>
+    
+    <!-- Quick Time Buttons -->
+    <div class="quick-times" id="quickTimes">
+      <button type="button" class="quick-btn" data-mins="5">+5 Mins</button>
+      <button type="button" class="quick-btn" data-mins="15">+15 Mins</button>
+      <button type="button" class="quick-btn" data-mins="30">+30 Mins</button>
+      <button type="button" class="quick-btn" data-mins="60">+1 Hour</button>
+      <button type="button" class="quick-btn" data-mins="1440">Tomorrow</button>
+    </div>
+
     <div class="actions">
-      <button type="submit" class="primary">Add Reminder</button>
-      <button type="button" id="testBtn" class="ghost">Test Push</button>
+      <button type="submit" class="primary" id="submitBtn">Add Reminder</button>
+      <button type="button" class="cancel-edit" id="cancelEditBtn">Cancel Edit</button>
+      <button type="button" id="testBtn" class="ghost">Test</button>
     </div>
   </form>
 
   <div class="listhead"><h2>Scheduled</h2></div>
-  <div id="list"><div class="empty">Loading…</div></div>
-  <div id="status" class="status"></div>
+  <div id="list"><div class="empty">Loading...</div></div>
 </div>
 
 <script>
@@ -86,20 +112,41 @@
   var setupEl = document.getElementById("setup");
   var form = document.getElementById("form");
   var listEl = document.getElementById("list");
-  var statusEl = document.getElementById("status");
   var titleEl = document.getElementById("title");
   var msgEl = document.getElementById("msg");
   var timeEl = document.getElementById("time");
   var repeatEl = document.getElementById("repeat");
   var testBtn = document.getElementById("testBtn");
+  var submitBtn = document.getElementById("submitBtn");
+  var cancelEditBtn = document.getElementById("cancelEditBtn");
 
   var deviceId = localStorage.getItem("deviceId");
   if (!deviceId) {
     deviceId = "d_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9);
     localStorage.setItem("deviceId", deviceId);
   }
-  statusEl.textContent = "Device: " + deviceId.slice(0, 12) + "…";
 
+  var editingId = null; // Track edit mode
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function formatInputDate(d) {
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+  function fmtTime(ts) {
+    return new Date(ts).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  }
+
+  // Quick Time Buttons Logic
+  document.getElementById("quickTimes").addEventListener("click", function(e) {
+    if(e.target.classList.contains("quick-btn")) {
+      var mins = parseInt(e.target.getAttribute("data-mins"));
+      var d = new Date(Date.now() + mins * 60000);
+      d.setSeconds(0, 0);
+      timeEl.value = formatInputDate(d);
+    }
+  });
+
+  // URL Base64 Decode
   function urlB64ToUint8(b64) {
     var pad = "=".repeat((4 - b64.length % 4) % 4);
     var s = (b64 + pad).replace(/-/g, "+").replace(/_/g, "/");
@@ -109,15 +156,10 @@
   }
 
   async function getReg() {
-    if (!("serviceWorker" in navigator)) throw new Error("Service Worker not supported");
+    if (!("serviceWorker" in navigator)) throw new Error("SW not supported");
     var reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
     await navigator.serviceWorker.ready;
     return reg;
-  }
-
-  async function isSubscribed(reg) {
-    var sub = await reg.pushManager.getSubscription();
-    return sub ? sub : null;
   }
 
   async function subscribe() {
@@ -126,28 +168,26 @@
       var perm = await Notification.requestPermission();
       if (perm !== "granted") {
         setupEl.className = "setup";
-        setupEl.innerHTML = "❌ Notification permission <b>denied</b>. Browser settings me allow karke reload karo.";
+        setupEl.innerHTML = "❌ Notification permission <b>denied</b>.<br>Browser settings se allow karo.";
         return;
       }
-      var existing = await isSubscribed(reg);
+      var existing = await reg.pushManager.getSubscription();
       var sub = existing;
       if (!sub) {
-        var keyResp = await fetch("/api/vapid-public-key").then(function (r) { return r.json(); });
+        var keyResp = await fetch("/api/vapid-public-key").then(r => r.json());
         sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlB64ToUint8(keyResp.key)
         });
       }
       await fetch("/api/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ deviceId: deviceId, subscription: sub })
       });
       setupEl.className = "setup ok";
-      setupEl.innerHTML = "✅ Notifications enabled. Tab band karke test karo.";
+      setupEl.innerHTML = "✅ Notifications enabled successfully!";
       loadReminders();
     } catch (e) {
-      console.error(e);
       setupEl.className = "setup";
       setupEl.innerHTML = "❌ Error: " + e.message;
     }
@@ -155,72 +195,136 @@
 
   async function loadReminders() {
     try {
-      var list = await fetch("/api/reminders?deviceId=" + encodeURIComponent(deviceId)).then(function (r) { return r.json(); });
+      var list = await fetch("/api/reminders?deviceId=" + encodeURIComponent(deviceId)).then(r => r.json());
       render(list);
     } catch (e) { listEl.innerHTML = '<div class="empty">Load failed</div>'; }
   }
 
-  function pad(n) { return String(n).padStart(2, "0"); }
-  function fmtTime(ts) {
-    return new Date(ts).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-  }
-  function remaining(ts) {
-    var d = ts - Date.now();
-    if (d <= 0) return "Due";
-    var s = Math.floor(d / 1000);
-    var dd = Math.floor(s / 86400), hh = Math.floor((s % 86400) / 3600), mm = Math.floor((s % 3600) / 60), ss = s % 60;
-    var p = [];
-    if (dd) p.push(dd + "d"); if (hh) p.push(hh + "h"); if (mm) p.push(mm + "m");
-    if (!dd && !hh) p.push(ss + "s");
-    return "in " + p.join(" ");
-  }
-
   function render(items) {
-    if (!items.length) { listEl.innerHTML = '<div class="empty">Koi reminder nahi. Upar se add karo 👆</div>'; return; }
-    items.sort(function (a, b) { return (a.fired ? 1 : 0) - (b.fired ? 1 : 0) || a.time - b.time; });
+    if (!items.length) { 
+      listEl.innerHTML = '<div class="empty">Koi reminder nahi hai.<br>Upar se naya add karo 👆</div>'; 
+      return; 
+    }
+    items.sort((a, b) => (a.fired ? 1 : 0) - (b.fired ? 1 : 0) || a.time - b.time);
     listEl.innerHTML = "";
+    
     items.forEach(function (it) {
       var card = document.createElement("div");
       card.className = "item" + (it.fired ? " done" : "");
+      
       var body = document.createElement("div");
       body.className = "body";
-      var t = document.createElement("div"); t.className = "t"; t.textContent = it.title; body.appendChild(t);
-      if (it.message) { var m = document.createElement("div"); m.className = "m"; m.textContent = it.message; body.appendChild(m); }
-      var meta = document.createElement("div"); meta.className = "meta";
+      
+      var t = document.createElement("div"); 
+      t.className = "t"; 
+      t.textContent = it.title; 
+      body.appendChild(t);
+      
+      if (it.message) { 
+        var m = document.createElement("div"); 
+        m.className = "m"; 
+        m.textContent = it.message; 
+        body.appendChild(m); 
+      }
+      
+      var meta = document.createElement("div"); 
+      meta.className = "meta";
       var p1 = document.createElement("span"); p1.className = "pill"; p1.textContent = "🕒 " + fmtTime(it.time); meta.appendChild(p1);
       var p2 = document.createElement("span"); p2.className = "pill"; p2.textContent = it.repeat === "daily" ? "🔁 Daily" : "1️⃣ Once"; meta.appendChild(p2);
-      var p3 = document.createElement("span"); p3.className = "pill";
-      p3.textContent = it.fired ? "✅ Done" : "⏳ " + remaining(it.time);
-      meta.appendChild(p3);
+      if (it.fired) {
+        var p3 = document.createElement("span"); p3.className = "pill"; p3.textContent = "✅ Done"; meta.appendChild(p3);
+      }
       body.appendChild(meta);
       card.appendChild(body);
-      var del = document.createElement("button");
-      del.className = "danger"; del.textContent = "✕";
-      del.onclick = async function () {
-        await fetch("/api/reminders/" + it.id, { method: "DELETE" });
-        loadReminders();
+
+      // Actions (Edit & Delete)
+      var actions = document.createElement("div");
+      actions.className = "item-actions";
+
+      if(!it.fired) {
+        var editBtn = document.createElement("button");
+        editBtn.className = "icon-btn";
+        editBtn.innerHTML = "✏️";
+        editBtn.title = "Edit";
+        editBtn.onclick = function() { startEdit(it); };
+        actions.appendChild(editBtn);
+      }
+
+      var delBtn = document.createElement("button");
+      delBtn.className = "icon-btn del";
+      delBtn.innerHTML = "✕";
+      delBtn.title = "Delete";
+      delBtn.onclick = async function () {
+        if(confirm("Delete this reminder?")) {
+          await fetch("/api/reminders/" + it.id, { method: "DELETE" });
+          loadReminders();
+        }
       };
-      card.appendChild(del);
+      actions.appendChild(delBtn);
+      card.appendChild(actions);
+
       listEl.appendChild(card);
     });
   }
+
+  // Edit Logic
+  function startEdit(reminder) {
+    editingId = reminder.id;
+    titleEl.value = reminder.title;
+    msgEl.value = reminder.message || "";
+    repeatEl.value = reminder.repeat;
+    
+    // Convert timestamp to datetime-local format
+    var d = new Date(reminder.time);
+    timeEl.value = formatInputDate(d);
+
+    submitBtn.textContent = "Update Reminder";
+    submitBtn.style.background = "linear-gradient(135deg, #22c55e, #16a34a)"; // Green button
+    cancelEditBtn.style.display = "block";
+    
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetForm() {
+    editingId = null;
+    form.reset();
+    var d = new Date(Date.now() + 5 * 60000); d.setSeconds(0, 0);
+    timeEl.value = formatInputDate(d);
+    
+    submitBtn.textContent = "Add Reminder";
+    submitBtn.style.background = "linear-gradient(135deg, var(--accent), var(--accent2))";
+    cancelEditBtn.style.display = "none";
+  }
+
+  cancelEditBtn.onclick = resetForm;
 
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
     var title = titleEl.value.trim();
     var ts = new Date(timeEl.value).getTime();
     if (!title || !ts || isNaN(ts)) return alert("Title & time required");
-    await fetch("/api/reminders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        deviceId: deviceId, title: title, message: msgEl.value.trim(),
-        time: ts, repeat: repeatEl.value
-      })
-    });
-    titleEl.value = ""; msgEl.value = ""; repeatEl.value = "none";
-    var d = new Date(Date.now() + 5 * 60000); d.setSeconds(0, 0);
-    timeEl.value = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+
+    var payload = {
+      deviceId: deviceId, title: title, message: msgEl.value.trim(),
+      time: ts, repeat: repeatEl.value
+    };
+
+    if (editingId) {
+      // Update API call
+      await fetch("/api/reminders/" + editingId, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      // Create API call
+      await fetch("/api/reminders", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    resetForm();
     loadReminders();
   });
 
@@ -230,39 +334,38 @@
       body: JSON.stringify({ deviceId: deviceId })
     });
     if (!r.ok) alert("Test failed: " + (await r.json()).error);
-    else alert("Test push bheja! Ab tab band karke dekho — notification aayegi.");
+    else alert("Test push sent! Check your notification shade.");
   });
 
   (async function init() {
-    var d = new Date(Date.now() + 5 * 60000); d.setSeconds(0, 0);
-    timeEl.value = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
-
+    resetForm(); // Sets default time to +5m
+    
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-      setupEl.innerHTML = "❌ Is browser me Push support nahi hai.";
+      setupEl.innerHTML = "❌ Push not supported in this browser.";
       return;
     }
 
     try {
       var reg = await getReg();
-      var existing = await isSubscribed(reg);
+      var existing = await reg.pushManager.getSubscription();
       if (existing && Notification.permission === "granted") {
         await fetch("/api/subscribe", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ deviceId: deviceId, subscription: existing })
         });
         setupEl.className = "setup ok";
-        setupEl.innerHTML = "✅ Notifications already enabled.";
+        setupEl.innerHTML = "✅ Notifications active.";
         loadReminders();
       } else {
         setupEl.className = "setup";
-        setupEl.innerHTML = "Notifications enable karne ke liye button dabao.<br><button id='enableBtn'>Enable Notifications</button>";
+        setupEl.innerHTML = "Notifications band hain. Enable karo.<br><button id='enableBtn'>Enable Notifications</button>";
         document.getElementById("enableBtn").onclick = subscribe;
       }
     } catch (e) {
       setupEl.innerHTML = "❌ " + e.message;
     }
 
-    setInterval(loadReminders, 5000);
+    setInterval(loadReminders, 5000); // Auto-refresh list
   })();
 })();
 </script>
